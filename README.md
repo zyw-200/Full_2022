@@ -51,32 +51,21 @@ Our system has two parts: system mode and user mode. We compile them separately 
 	./scripts/getArch.sh ./images/9050.tar.gz
 	./scripts/makeImage.sh 9050
 	./scripts/inferNetwork.sh 9050
-	cd ..
-	python FirmAFL_setup.py 9050 mipsel
 
-4. modify the run.sh in image_9050 directory as following,  in order to emulate firmware with our modified QEMU and kernel, and running on the RAM file.
->For mipsel,
+	by using the makeImage.sh in dependence/, the image_dir will be generated under firmadyne/
 
-	ARCH=mipsel
-	QEMU="./qemu-system-${ARCH}"
-	KERNEL="./vmlinux.${ARCH}_3.2.1" 
-	IMAGE="./image.raw"
-	MEM_FILE="./mem_file"
-	${QEMU} -m 256 -mem-prealloc -mem-path ${MEM_FILE} -M ${QEMU_MACHINE} -kernel ${KERNEL} \ 
->For mipseb,
 
-	ARCH=mips
-	QEMU="./qemu-system-${ARCH}"
-	KERNEL="./vmlinux.${ARCH}_3.2.1" 
-	IMAGE="./image.raw"
-	MEM_FILE="./mem_file"
-	${QEMU} -m 256 -mem-prealloc -mem-path ${MEM_FILE} -M ${QEMU_MACHINE} -kernel ${KERNEL} \
+4. for firmware setup, 
+
+	python run_afl_full_long.py 9925 httpd 192.168.0.30 80 1, and then kill the process
+	replace the input/seed, test.py, FirmAFL_config with that in FirmAFL_config
 
 5. run the fuzzing process
 >after running the start.py script, FirmAFL will start the firmware emulation, and after the system initialization(120s), the fuzzing process will start. (Maybe you should use root privilege to run it.)
 
 	cd image_9050
-	python start.py 9050
+	./run_full.sh
+	python test.py
 
 
 

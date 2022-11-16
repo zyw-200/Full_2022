@@ -1,11 +1,11 @@
-//#define FULL
+#define FULL
 
 #ifdef FULL
 
 #define DECAF
 #define FUZZ
-#define FORK_OR_NOT
-//#define STORE_PAGE_FUNC
+//#define FORK_OR_NOT
+#define STORE_PAGE_FUNC
 //#define AUTO_FIND_FORK_PC //pc need change
 #define MAX_LEN 3000
 //#define DEBUG

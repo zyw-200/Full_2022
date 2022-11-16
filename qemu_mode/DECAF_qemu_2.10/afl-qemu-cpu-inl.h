@@ -764,6 +764,7 @@ target_ulong afl_noforkserver_restart(CPUArchState *env, int status)
     feed_times = 0;
     afl_user_fork = 1;
     //restore_page(1);
+    restore_page(); //zyw 
     return 0;
 }
 
