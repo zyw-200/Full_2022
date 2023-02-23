@@ -1,9 +1,11 @@
 import os
 import sys
 
+firmadyne_dir = "./firmadyne"
+
 def generate_run_full(image_id, arch):
-	script_src = "firmadyne/scratch/%s/run.sh" %image_id
-	script_dst = "firmadyne/scratch/%s/run_full.sh" %image_id
+	script_src = "%s/scratch/%s/run.sh" %(firmadyne_dir, image_id)
+	script_dst = "%s/scratch/%s/run_full.sh" %(firmadyne_dir, image_id)
 	file_src = open(script_src)
 	file_dst = open(script_dst, "w+")
 	remove_flag = 0
@@ -19,7 +21,7 @@ def generate_run_full(image_id, arch):
 				archh = "arm"
 			newline_0 = "QEMU=./qemu-system-%s\n" %archh
 			if cmp(archh, "mipsel") == 0 or cmp(archh, "mips") == 0:
-				newline_1 = "KERNEL='./vmlinux.%s_3.2.1'\n" %archh
+				newline_1 = "KERNEL='./vmlinux.%s'\n" %arch
 			elif cmp(archh, "arm") == 0:
 				newline_1 = "KERNEL='./zImage.armel'\n"
 			else:

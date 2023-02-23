@@ -1,36 +1,8 @@
-# FIRM-AFL
-
-FIRM-AFL is the first high-throughput greybox fuzzer for IoT firmware. FIRM-AFL addresses two fundamental problems in IoT fuzzing. First, it addresses compatibility issues by enabling fuzzing for POSIX-compatible firmware that can be emulated in a system emulator. Second, it addresses the performance bottleneck caused by system-mode emulation with a novel technique called "augmented process emulation". By combining system-mode emulation and user-mode emulation in a novel way, augmented process emulation provides high compatibility as system-mode emulation and high throughput as user-mode emulation. 
-
-## Publication
-
-Yaowen Zheng, Ali Davanian, Heng Yin, Chengyu Song, Hongsong Zhu, Limin Sun, “FIRM-AFL: High-throughput greybox fuzzing of IoT firmware via augmented process emulation,” in USENIX Security Symposium, 2019.
-
-## Introduction
-
-FIRM-AFL is the first high-throughput greybox fuzzer for IoT firmware. FIRM-AFL addresses two fundamental problems in IoT fuzzing. First, it addresses compatibility issues by enabling fuzzing for POSIX-compatible firmware that can be emulated in a system emulator. Second, it addresses the performance bottleneck caused by system-mode emulation with a novel technique called "augmented process emulation". By combining system-mode emulation and user-mode emulation in a novel way, augmented process emulation provides high compatibility as system-mode emulation and high throughput as user-mode emulation. The overview is show in Figure 1.
-
-<div align=center><img src="https://github.com/zyw-200/FirmAFL/raw/master/image/augmented_process_emulation.png" width=70% height=70% /></div>
-
-<div align=center>Figure 1. Overview of Augmented Process Emulation</div>
-
-&nbsp;
-
-We design and implement FIRM-AFL, an enhancement of AFL for fuzzing IoT firmware. We keep the workflow of AFL intact and replace the user-mode QEMU with augmented process emulation, and the rest of the components remain unchanged. The new workflow is illustrated in Figure 2.
-
-<div align=center><img src="https://github.com/zyw-200/FirmAFL/raw/master/image/overview_of_FirmAFL.png" width=70% height=70% /></div>
-
-<div align=center>Figure 2. Overview of FIRM-AFL</div>
-
+# Full system emulation
 
 ## Setup
 
-Our system has two parts: system mode and user mode. We compile them separately for now.
-
-### User mode 
-	cd user_mode/
-	./configure --target-list=mipsel-linux-user,mips-linux-user,arm-linux-user --static --disable-werror
-	make
+Our system is built upon the QEMU
 
 ### System mode
 	cd qemu_mode/DECAF_qemu_2.10/
@@ -39,9 +11,9 @@ Our system has two parts: system mode and user mode. We compile them separately 
 
 ## Usage
 
-1.  Download the Firmdyne repo to the root directory of FirmAFL, then setup the firmadyne according to its instructions including importing its datasheet https://cmu.app.boxcn.net/s/hnpvf1n72uccnhyfe307rc2nb9rfxmjp into database.
+1.  Download the Firmdyne repo to the **root directory of Full_2022**, then setup the firmadyne (e.g., ./download.sh) according to its instructions including importing its datasheet https://cmu.app.boxcn.net/s/hnpvf1n72uccnhyfe307rc2nb9rfxmjp into database.
 
-2.  Replace the scripts/makeImage.sh, scripts/makeNetwork.py with modified one in firmadyne_modify directory.
+2.  Replace the scripts/makeImage.sh, scripts/makeNetwork.py, scripts/getArch.sh, sources/extractor/extractor.py with modified one in **firmadyne_modify** directory.
 
 3.  follow the guidance from firmadyne to generate the system running scripts. 
 >Take DIR-815 router firmware as a example,
@@ -52,20 +24,25 @@ Our system has two parts: system mode and user mode. We compile them separately 
 	./scripts/makeImage.sh 9050
 	./scripts/inferNetwork.sh 9050
 
-	by using the makeImage.sh in dependence/, the image_dir will be generated under firmadyne/
+	by using the makeImage.sh, the image_dir will be generated under Full_2022/
 
 
-4. for firmware setup, 
+4. Setup for full-system emulation, 
 
-	python run_afl_full_long.py 9925 httpd 192.168.0.30 80 1, and then kill the process
-	replace the input/seed, test.py, FirmAFL_config with that in FirmAFL_config
+	python Full_setup.py 9050 cgibin
 
-5. run the fuzzing process
->after running the start.py script, FirmAFL will start the firmware emulation, and after the system initialization(120s), the fuzzing process will start. (Maybe you should use root privilege to run it.)
+
+5.  configuration for specific firmware
+	e.g., for 9050 firmware, put following file in image_9050
+	FirmAFL_config/9050/FirmAFL_config
+	FirmAFL_config/9050/test.py
+
+6. run the fuzzing process
+It will start the firmware emulation, and after the initialization of system and http process , send the request, then fuzzing process will start. (Maybe you should use root privilege to run it.)
 
 	cd image_9050
 	./run_full.sh
-	python test.py
+	python test.py 192.168.0.1
 
 
 

@@ -1,81 +1,217 @@
-import sys
 import os
+import sys
+import subprocess
+import time
+import threading
 
-firm_id = sys.argv[1]
-firm_arch = sys.argv[2]
-firm_dir = "image"+firm_id
+firmadyne_dir = "./firmadyne/"
+dependence_dir = "./dependence"
+
+
+image_id = sys.argv[1]
+type_name = sys.argv[2]
+
+
+
+image_dir = "image_%s" %(image_id)
+
+
+
+def find_program_helper(dir_name, str_name):
+	os.chdir(dir_name)
+	cmd = "find  . -name '%s'" %(str_name)
+	res = os.popen(cmd)
+	text =res.read()
+	if len(text) == 0: #no results by find.
+		os.chdir("../")
+		return "", ""
+	arr = text.strip().split("\n")
+	for i in range(0, len(arr)):
+		file_name = arr[i].strip("\n")
+		file_cmd_str = "file %s" %file_name
+		res = os.popen(file_cmd_str)
+		text =res.read()
+		if "executable" in text and "text executable" not in text: #executable not shell script
+			os.chdir("../")
+			return file_name, file_name.split("/")[-1].strip("\n")
+		elif os.path.islink(file_name):
+			real_file = os.readlink(file_name)
+			os.chdir("../")
+			return file_name, real_file.split("/")[-1].strip("\n")
+		else:
+			continue
+	
+	#not found
+	os.chdir("../")
+	return "", ""
+
+def find_http_helper(dir_name, str_name):
+	os.chdir(dir_name)
+	cmd = "find  . -name '%s'" %(str_name)
+	res = os.popen(cmd)
+	text =res.read()
+	if len(text) == 0: #no results by find.
+		os.chdir("../")
+		return "", ""
+	arr = text.strip().split("\n")
+	for i in range(0, len(arr)):
+		file_name = arr[i].strip("\n")
+		#for httpd finding (http.cgi")
+		if "." in file_name[1:] or "-" in file_name or "config" in file_name or "_" in file_name:
+			continue
+		file_cmd_str = "file %s" %file_name
+		res = os.popen(file_cmd_str)
+		text =res.read()
+		if "executable" in text and "text executable" not in text: #executable not shell script
+			os.chdir("../")
+			return file_name, file_name.split("/")[-1].strip("\n")
+		else:
+			continue
+	
+	#not found
+	os.chdir("../")
+	return "", ""
+
+def get_short_name(http_name):
+	arr = http_name.split("/")
+	short_name = arr[len(arr) - 1].strip("\n")
+	return short_name
+
+def find_program(dir_name, test_name):
+	#type_name in short, is real name for link. 
+	#type name is short name of executable
+	#type name is httpd, if test_name is "httpd"
+	if "12933" in dir_name or "4671" in dir_name:
+		prog_name, type_name = find_program_helper(dir_name, "mini_httpd")
+		return prog_name, test_name
+	if "20677" in dir_name or "19356" in dir_name:
+		prog_name, type_name = find_program_helper(dir_name, "smd")
+		return prog_name, test_name
+		
+	elif cmp(test_name, "httpd") == 0:
+		prog_name, type_name = find_http_helper(dir_name, "*http*")
+		if len(prog_name)!=0:
+			return prog_name, "httpd"
+		prog_name, type_name  = find_http_helper(dir_name, "*boa*")
+		if len(prog_name)!=0:
+			return prog_name, "httpd"
+		prog_name, type_name  = find_http_helper(dir_name, "*web*")
+		if len(prog_name)!=0:
+			return prog_name, "httpd" 
+		prog_name, type_name  = find_http_helper(dir_name, "*hydra*")
+		if len(prog_name)!=0:
+			return prog_name, "httpd" 
+	else:
+		prog_name, type_name = find_program_helper(dir_name, test_name)
+		return prog_name, type_name
 
 os.system("echo core >/proc/sys/kernel/core_pattern")
 os.system("cd /sys/devices/system/cpu\necho performance | tee cpu*/cpufreq/scaling_governor\ncd -")
 
-cmd = "python generate_run_full.py %s %s" %(firm_id, firm_arch)
+cmd = "cp %s/firmadyne.config ./" %firmadyne_dir
 os.system(cmd)
-sys_run_src = "firmadyne/scratch/%s/run_full.sh" %(firm_id)
-user_run_src = "FirmAFL_config/%s/user.sh" %firm_id
-if "mips" in firm_arch:
-	sys_src = "qemu_mode/DECAF_qemu_2.10/%s-softmmu/qemu-system-%s" %(firm_arch, firm_arch)
-	user_src = "user_mode/%s-linux-user/qemu-%s" %(firm_arch, firm_arch)
+
+print("##################prepare QEMU dependance#######################")
+cmd = "cp dependence/vgabios-cirrus.bin %s" %image_dir
+os.system(cmd)
+cmd = "cp dependence/efi-e1000.rom %s" %image_dir
+os.system(cmd)
+cmd = "cp dependence/efi-pcnet.rom %s" %image_dir
+os.system(cmd)
+
+owd = os.getcwd()
+os.chdir(firmadyne_dir)
+print("##################copy QEMU#######################")
+cmd = "./scripts/getArch.sh images/%s.tar.gz" %(image_id)
+print(cmd)
+res = os.popen(cmd)
+text =res.read()
+print("arch is ", text)
+os.chdir(owd)
+
+arch = ""
+if "mipsel" in text:
+	QEMU = "./qemu-mipsel"
+	arch = "mipsel"
+	copy_str = "cp %s/qemu-system-mipsel-full %s/qemu-system-mipsel"  %(dependence_dir, image_dir)
+	os.system(copy_str)
+elif "mipseb" in text:
+	QEMU = "./qemu-mips"
+	arch = "mipseb"
+	copy_str = "cp %s/qemu-system-mips-full %s/qemu-system-mips" %(dependence_dir, image_dir)
+	os.system(copy_str)
+elif "armel" in text:
+	QEMU = "./qemu-arm"
+	arch = "armel"
+	copy_str = "cp %s/qemu-system-arm-full %s/qemu-system-arm" %(dependence_dir, image_dir)
+	os.system(copy_str)
 else:
-	sys_src = "qemu_mode/DECAF_qemu_2.10/arm-softmmu/qemu-system-arm"
-	user_src = "user_mode/arm-linux-user/qemu-arm" 
-config_src = "FirmAFL_config/%s/FirmAFL_config" %(firm_id)
-test_src = "FirmAFL_config/%s/test.py" %(firm_id)
-keywords_src = "FirmAFL_config/%s/keywords" %(firm_id)
-afl_src= "FirmAFL_config/afl-fuzz-full"
-firmadyne_src = "firmadyne/firmadyne.config"
-image_src = "firmadyne/scratch/%s/image.raw" %firm_id
-if "mips" in firm_arch:
-	kernel_src ="firmadyne_modify/vmlinux.%s_3.2.1" %firm_arch
+	print("#########################error########################")
+
+print("##################copy kernel & IMAGE#######################")
+
+cmd = "cp %s/scratch/%s/image.raw %s" %(firmadyne_dir, image_id, image_dir)
+os.system(cmd)
+if int(image_id) in [16385]:
+	cmd = "cp %s/vmlinux.%s %s" %(dependence_dir, arch, image_dir)
 else:
-	kernel_src ="firmadyne_modify/zImage.armel"
-procinfo_src =  "FirmAFL_config/procinfo.ini"
-other_file1 =  "FirmAFL_config/efi-pcnet.rom"
-other_file2 =  "FirmAFL_config/vgabios-cirrus.bin"
-cmd_input = "mkdir image_%s/inputs" %firm_id
-seed_src = "FirmAFL_config/%s/seed" %(firm_id)
-start_src = "FirmAFL_config/start_full.py"
-
-dst = "image_%s/" %firm_id
-dst_input = "image_%s/inputs/" %firm_id
-
-cmd = []
-cmd.append("cp %s %s" %(sys_run_src, dst)) 
-cmd.append("cp %s %s" %(user_run_src, dst)) 
-cmd.append("cp %s %s" %(sys_src, dst)) 
-cmd.append("cp %s %safl-qemu-trace" %(user_src, dst)) 
-cmd.append("cp %s %s" %(config_src, dst)) 
-cmd.append("cp %s %s" %(test_src, dst)) 
-cmd.append("cp %s %s" %(keywords_src, dst)) 
-cmd.append("cp %s %s" %(afl_src, dst)) 
-cmd.append("cp %s %s" %(firmadyne_src, dst)) 
-cmd.append("cp %s %s" %(image_src, dst)) 
-cmd.append("cp %s %s" %(kernel_src, dst))
-cmd.append("cp %s %s" %(procinfo_src, dst)) 
-cmd.append("cp %s %s" %(other_file1, dst)) 
-cmd.append("cp %s %s" %(other_file2, dst)) 
-cmd.append(cmd_input)
-cmd.append("cp %s %s" %(seed_src, dst_input)) 
-cmd.append("cp %s %s" %(start_src, dst)) 
-
-for i in range(0, len(cmd)):
-	os.system(cmd[i])
+	cmd = "cp %s/vmlinux.%s_3.2.1 %s/vmlinux.%s" %(dependence_dir, arch, image_dir, arch)
+os.system(cmd)
 
 
-if cmp(firm_id, "129780") == 0:
-	os.system("cp FirmAFL_config/missing_file/129780/net.conf image_129780/var/config/")
-	os.system("mkdir image_129780/var/run/")
-	os.system("cp FirmAFL_config/missing_file/129780/profile.ini image_129780/var/run/")
-	os.system("cp FirmAFL_config/missing_file/129780/video.ini image_129780/var/run/")
-elif cmp(firm_id, "129781") == 0:
-	os.system("cp FirmAFL_config/missing_file/129781/net.conf image_129781/var/config/")
-	os.system("cp FirmAFL_config/missing_file/129781/net.conf image_129781/var/config/net.conf_ori")
-elif cmp(firm_id, "10853") == 0:
-	os.system("mkdir image_10853/var/run/")
-	os.system("mkdir image_10853/var/etc/")
-	os.system("cp FirmAFL_config/missing_file/10853/nvram.conf image_10853/var/etc/")
-	os.system("cp FirmAFL_config/missing_file/10853/rc.pid image_10853/var/run/")
-	os.system("cp FirmAFL_config/missing_file/10853/httpd.pid image_10853/var/run/")
-elif cmp(firm_id, "161161") == 0:
-	os.system("mkdir image_161161/tmp/etc/")
-	os.system("cp FirmAFL_config/missing_file/161161/nvram.conf image_161161/tmp/etc/")
-	os.system("cp FirmAFL_config/missing_file/161161/nvram_default_counter image_161161/tmp/etc/")
+print("##################copy fuzzing stuff #######################")
+
+
+#need afl-fuzz-full test.py run_full.sh
+keyword_file = "keywords/%s/%s" %(type_name, image_id)
+
+cmdstr = "cp %s %s/keywords" %(keyword_file, image_dir)
+os.system(cmdstr)
+cmdstr = "mkdir %s/inputs" %image_dir
+os.system(cmdstr)
+
+
+cmdstr = "rm %s/inputs/*" %image_dir
+os.system(cmdstr)
+if cmp(image_id, "18627")!=0:
+	cmdstr = "cp %s/seed_get %s/inputs/" %(dependence_dir, image_dir)
+	print("############", cmdstr)
+	os.system(cmdstr)
+else:
+	cmdstr = "cp %s/seed_post %s/inputs/" %(dependence_dir, image_dir)
+	os.system(cmdstr)
+		
+cmd = "cp %s/procinfo.ini %s" %(dependence_dir, image_dir)
+os.system(cmd)
+
+cmdstr = "cp %s/afl-fuzz-full %s/" %(dependence_dir, image_dir)
+os.system(cmdstr)
+cmdstr = "cp %s/test.py %s/" %(dependence_dir, image_dir)
+os.system(cmdstr)
+cmdstr = "python generate_run_full.py %s %s" %(image_id, arch)
+os.system(cmdstr)
+cmdstr = "cp -f %s/scratch/%s/run_full.sh %s/" %(firmadyne_dir, image_id, image_dir)
+os.system(cmdstr)
+cmdstr = "chmod 777 %s/run_full.sh" %image_dir
+os.system(cmdstr)
+
+prog_name, type_name  =  find_program(image_dir, type_name)
+short_name = get_short_name(prog_name)
+
+
+os.chdir(image_dir)
+
+
+print("##################create FirmAFL_config#######################")
+
+fp = open("FirmAFL_config", "w+")
+fp.write("mapping_filename=mapping_table\n")
+fp.write("init_read_pipename=user_cpu_state\n")
+fp.write("write_pipename=full_cpu_state\n")
+fp.write("program_analysis=%s\n" %short_name)
+if strstr(type_name, httpd):
+	fp.write("feed_type=FEED_HTTP\n")
+else:
+	fp.write("feed_type=FEED_ENV\n")
+fp.write("id=%s" %image_id)
+fp.close()
