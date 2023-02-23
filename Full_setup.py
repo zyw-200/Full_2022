@@ -6,6 +6,7 @@ import threading
 
 firmadyne_dir = "./firmadyne/"
 dependence_dir = "./dependence"
+qemu_dir = "./qemu_mode/DECAF_qemu_2.10/"
 
 
 image_id = sys.argv[1]
@@ -133,17 +134,17 @@ arch = ""
 if "mipsel" in text:
 	QEMU = "./qemu-mipsel"
 	arch = "mipsel"
-	copy_str = "cp %s/qemu-system-mipsel-full %s/qemu-system-mipsel"  %(dependence_dir, image_dir)
+	copy_str = "cp %s/mipsel-softmmu/qemu-system-mipsel %s/qemu-system-mipsel"  %(qemu_dir, image_dir)
 	os.system(copy_str)
 elif "mipseb" in text:
 	QEMU = "./qemu-mips"
 	arch = "mipseb"
-	copy_str = "cp %s/qemu-system-mips-full %s/qemu-system-mips" %(dependence_dir, image_dir)
+	copy_str = "cp %s/mips-softmmu/qemu-system-mips %s/qemu-system-mips" %(qemu_dir, image_dir)
 	os.system(copy_str)
 elif "armel" in text:
 	QEMU = "./qemu-arm"
 	arch = "armel"
-	copy_str = "cp %s/qemu-system-arm-full %s/qemu-system-arm" %(dependence_dir, image_dir)
+	copy_str = "cp %s/arm-softmmu/qemu-system-arm %s/qemu-system-arm" %(qemu_dir, image_dir)
 	os.system(copy_str)
 else:
 	print("#########################error########################")
