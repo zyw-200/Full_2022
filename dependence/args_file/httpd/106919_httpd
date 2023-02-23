@@ -1,0 +1,2 @@
+httpd^-f^/var/run/httpd.conf^
+PATH=/sbin:/usr/sbin:/bin:/usr/bin^HOME=/^SHELL=/bin/sh^

@@ -33,9 +33,11 @@ Our system is built upon the QEMU
 
 
 5.  configuration for specific firmware
+
 	e.g., for 9050 firmware, put following file in image_9050
-	FirmAFL_config/9050/FirmAFL_config
-	FirmAFL_config/9050/test.py
+	FirmAFL_config/9050/FirmAFL_config -> image_9050/
+	FirmAFL_config/9050/test.py -> image_9050/
+	FirmAFL_config/9050/seed -> image_9050/inputs/seed_get
 
 6. run the fuzzing process
 It will start the firmware emulation, and after the initialization of system and http process , send the request, then fuzzing process will start. (Maybe you should use root privilege to run it.)

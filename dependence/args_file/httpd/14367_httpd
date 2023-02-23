@@ -1,0 +1,2 @@
+httpd^
+USER=root^HOME=/^user_debug=31^TMPDIR=/var/tmp^TERM=vt102^PATH=/sbin:/usr/sbin:/bin:/usr/bin^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^TZ=GMT-00:00^

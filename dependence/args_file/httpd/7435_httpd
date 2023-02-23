@@ -1,0 +1,2 @@
+/usr/sbin/uhttpd^-h^/www^-r^WNDR4300^-x^/cgi-bin^-t^60^-p^0.0.0.0:80^-C^/tmp/uhttpd.crt^-K^/tmp/uhttpd.key^-s^0.0.0.0:443^
+USER=root^HOME=/^user_debug=31^TERM=vt102^PATH=/bin:/sbin:/usr/bin:/usr/sbin^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^

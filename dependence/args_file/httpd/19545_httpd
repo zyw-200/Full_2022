@@ -1,0 +1,2 @@
+/bin/hydra^-d^-c^/etc/hydra/^
+TERM=linux^PATH=/bin:/usr/bin:/etc:/sbin:/usr/sbin^TZ=GMT0^SHELL=/bin/sh^

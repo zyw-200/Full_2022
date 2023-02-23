@@ -209,7 +209,7 @@ fp.write("mapping_filename=mapping_table\n")
 fp.write("init_read_pipename=user_cpu_state\n")
 fp.write("write_pipename=full_cpu_state\n")
 fp.write("program_analysis=%s\n" %short_name)
-if strstr(type_name, httpd):
+if "http" in short_name:
 	fp.write("feed_type=FEED_HTTP\n")
 else:
 	fp.write("feed_type=FEED_ENV\n")

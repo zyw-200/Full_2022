@@ -1,0 +1,2 @@
+/usr/sbin/mini_httpd^-d^/www^-r^NETGEAR DG834PN ^-c^**.cgi^-f^indexca.htm^-t^300^
+USER=root^HOME=/^user_debug=31^TERM=vt102^PATH=/bin:/sbin:/usr/sbin:/usr/bin^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^

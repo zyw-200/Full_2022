@@ -1,0 +1,2 @@
+httpd^-s^wapnd03_dkbs_dap1353b^-f^/var/etc/httpd.cfg^
+USER=root^SHELL=/bin/sh^PATH=/usr/bin:/bin:/usr/sbin:/sbin^user_debug=31^LD_PRELOAD=/firmadyne/libnvram.so^TERM=vt102^HOME=/^

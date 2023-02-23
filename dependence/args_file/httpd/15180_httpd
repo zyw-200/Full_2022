@@ -1,0 +1,2 @@
+/usr/bin/httpd^
+USER=root^SHELL=/bin/sh^PATH=/usr/bin:/bin:/usr/sbin:/sbin:/etc/ath^user_debug=31^LD_PRELOAD=/firmadyne/libnvram.so^TERM=vt102^HOME=/^

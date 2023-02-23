@@ -1,0 +1,2 @@
+smd^
+TMOUT=0^LD_LIBRARY_PATH=/lib:/lib/public:/lib/private^USER=root^SHELL=/bin/sh^PATH=/home/bin:/home/scripts:/etc/gpon/bin:/etc/gpon/scripts:/bin:/sbin:/usr/bin^user_debug=31^LD_PRELOAD=/firmadyne/libnvram.so^TERM=vt102^HOME=/^

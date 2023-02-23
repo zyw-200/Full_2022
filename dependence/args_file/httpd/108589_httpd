@@ -1,0 +1,2 @@
+uhttpd^-e^/usr/sbin/detwan^
+USER=root^HOME=/^user_debug=31^TERM=vt102^PATH=/usr/bin:/bin:/usr/sbin:/sbin^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^

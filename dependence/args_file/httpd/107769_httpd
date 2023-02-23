@@ -1,0 +1,2 @@
+httpd^
+HOME=/^TERM=linux^LD_PRELOAD=/firmadyne/libnvram.so^user_debug=31^TZ=GMT0DST,M03.05.00,M10.05.00^PATH=/sbin:/bin:/usr/sbin:/usr/bin^

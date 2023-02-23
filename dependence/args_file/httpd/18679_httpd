@@ -1,0 +1,2 @@
+httpd^
+USER=root^LD_LIBRARY_PATH=/ram/lib:/lib:/lib/iptables^HOME=/^user_debug=31^TERM=vt102^PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/bin/scripts^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^

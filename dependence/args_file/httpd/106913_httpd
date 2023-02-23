@@ -1,0 +1,2 @@
+jjhttpd^-m^RUN_HTTP^-d^/www^-P^/var/run/jjhttpd_0.pid^-p^80^-w^/var/tmp/wa_www^-s^SP_GUI^
+USER=root^HOME=/^user_debug=31^TERM=vt102^PATH=/sbin:/usr/sbin:/bin:/usr/bin:/mydlink^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^

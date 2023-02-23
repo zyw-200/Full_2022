@@ -1,0 +1,2 @@
+httpd^-s^wrgg15_di524^-f^/var/etc/httpd.cfg^
+HOME=/^TERM=vt102^LD_PRELOAD=/firmadyne/libnvram.so^user_debug=31^PATH=/usr/bin:/bin:/usr/sbin:/sbin^SHELL=/bin/sh^USER=root^

@@ -1,0 +1,2 @@
+/sbin/lighttpd^-f^/etc/lighttpd.conf^
+USER=root^HOME=/^user_debug=31^TERM=vt102^PATH=/sbin:/usr/sbin:/bin:/usr/bin^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^

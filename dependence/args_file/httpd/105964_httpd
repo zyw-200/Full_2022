@@ -1,0 +1,2 @@
+/usr/sbin/uhttpd^-f^-h^/www^-r^OpenWrt^-x^/cgi-bin^-u^/ubus^-t^60^-T^30^-k^20^-A^1^-n^3^-N^100^-R^-p^0.0.0.0:80^-p^[::]:80^-C^/etc/uhttpd.crt^-K^/etc/uhttpd.key^-s^0.0.0.0:443^-s^[::]:443^-q^
+HOME=/^TERM=linux^LD_PRELOAD=/firmadyne/libnvram.so^user_debug=31^PATH=/bin:/sbin:/usr/bin:/usr/sbin^

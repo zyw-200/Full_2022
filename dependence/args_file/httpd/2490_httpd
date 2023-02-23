@@ -1,0 +1,2 @@
+httpd^-S^-E^/usr/sbin/ca.pem^/usr/sbin/httpsd.pem^
+USER=root^LD_LIBRARY_PATH=/lib:/lib/public:/lib/private^HOME=/^user_debug=31^TERM=vt102^PATH=/bin:/sbin:/usr/bin:/usr/sbin^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^TZ=GMT8DST,M03.02.00,M11.01.00^TMOUT=0^

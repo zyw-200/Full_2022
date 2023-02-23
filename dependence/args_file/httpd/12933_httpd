@@ -1,0 +1,2 @@
+mini_httpd^-M^0^-C^/var/tmp/mini_httpd_0.conf^
+USER=root^HOME=/^user_debug=31^TERM=vt102^PATH=/sbin:/usr/sbin:/bin:/usr/bin:/mydlink^LD_PRELOAD=/firmadyne/libnvram.so^SHELL=/bin/sh^PWD=/^
