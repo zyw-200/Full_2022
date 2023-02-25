@@ -39,6 +39,16 @@ Our system is built upon the QEMU
 		FirmAFL_config/9050/test.py -> image_9050/
 		FirmAFL_config/9050/seed -> image_9050/inputs/seed_get
 
+NOTE: when perform fuzzing to httpd, change the file **FirmAFL_config** as follows: (e.g., http_program_name is httpd for 9050 firmware), and also provide **seeds starting with either POST or GET**.
+
+		mapping_filename=mapping_table
+		init_read_pipename=user_cpu_state
+		write_pipename=full_cpu_state
+		program_analysis=http_program_name
+		feed_type=FEED_HTTP
+		id=9050
+		opti=yes
+
 6. run the fuzzing process
 It will start the firmware emulation, and after the initialization of system and http process , send the request, then fuzzing process will start. (Maybe you should use root privilege to run it.)
 

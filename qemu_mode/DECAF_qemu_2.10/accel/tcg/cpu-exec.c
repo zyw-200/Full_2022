@@ -17,7 +17,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-int lmbench_count = 0;
 int lat_select_init = 0;
 extern int thread_pool;
 extern int analysis_start;
@@ -312,8 +311,7 @@ target_ulong getWork(char * ptr, target_ulong sz)
     target_ulong retsz;
     FILE *fp;
     unsigned char ch;
-    //printf("pid %d: getWork %lx %lx\n", getpid(), ptr, sz);fflush(stdout);
-    //printf("filename:%s\n",aflFile);
+
     fp = fopen(aflFile, "rb");
     if(!fp) {
         perror(aflFile);
@@ -414,15 +412,13 @@ void prepare_feed_input(CPUState * cpu)
     }
     else if(strcmp(feed_type, "FEED_HTTP") == 0)
     {
-
         /*
-        pre_feed_finish = 1;
-        CPUArchState *env= cpu->env_ptr;
-#ifdef TARGET_MIPS
-        feed_addr = env->active_tc.gpr[5];
-#else defined(TARGET_ARM)
-        feed_addr = env->regs[1];
-#endif
+        getWork(recv_buf, 4096);     
+        if(check_http_header(recv_buf) == 0)
+        {
+            printf("******** Please provide a seed starting with either POST or GET*********\n");
+            exit(0);
+        }
         */
     }
     else if (strcmp(feed_type, "FEED_CMD") == 0)
@@ -530,49 +526,6 @@ int check_http_header(char * input) // if all are readable charater before =
     }
 }
 
-/*
-int check_http_header(char * input) // if all are readable charater before =
-{   
-    if(program_id == 9925)
-    {
-        if(strncmp(input, "GET /session_login.php HTTP/1.1", 31) == 0)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else if(program_id == 10853)
-    {
-        if(strncmp(input, "POST /HNAP1/ HTTP/1.1", 21) == 0)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-
-    }
-    else if(program_id == 161161)
-    {
-        if(strncmp(input, "POST /apply.cgi HTTP/1.1\r\n", 26) == 0)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-
-    }
-
-    return 1;
-}
-*/
-
 int feed_input(CPUState * cpu)
 {
     if(strcmp(feed_type, "FEED_ENV") == 0)
@@ -621,35 +574,7 @@ int feed_input(CPUState * cpu)
     }
     else if(strcmp(feed_type, "FEED_HTTP") == 0) 
     {
-        //DECAF_printf("feed input -----------\n");
-        /*
-        if(pre_feed_finish == 0)
-            return 0;
-        CPUArchState *env = cpu->env_ptr;
-        char input_buf[MAX_LEN-100];
-        int get_len = getWork(input_buf, MAX_LEN-100);
-        if(get_len > 2800)
-        {
-            get_len = 2700;
-        }
-
-        int tmp_addr = write_package(cpu, feed_addr, input_buf, get_len);
-        DECAF_write_mem(cpu, tmp_addr, 1, "\0"); //important
-
-#ifdef TARGET_MIPS
-        env->active_tc.gpr[2] = tmp_addr - feed_addr;
-        //DECAF_printf("modified length:%d\n", env->active_tc.gpr[2]);
-        char tt[4096];
-        DECAF_read_mem(cpu, feed_addr, 4096, tt);
-        DECAF_printf("modified content:########%s\n", tt);
-#else defined(TARGET_ARM)
-        env->regs[0] = tmp_addr - feed_addr;
-#endif
-        return 1;
-        */
-        total_len = getWork(recv_buf, 4096);
-        
-        
+        total_len = getWork(recv_buf, 4096);     
         if(check_http_header(recv_buf) == 0)
         {
             //printf("recv_buf:%s\n", recv_buf);
@@ -2302,12 +2227,7 @@ int specify_fork_pc(CPUState *cpu)
         if(start_fork_pc == 0 && pc == config_pc)
         {
             target_ulong pgd = DECAF_getPGD(cpu);
-#ifdef LMBENCH
-            //if(pgd != 0 && httpd_pgd !=0) {
             if(find_pgd(pgd)) {
-#else
-            if(find_pgd(pgd)) {
-#endif
                 target_pgd = pgd;
                 stack_mask = stack & 0xfff00000;
                 ori_thread = cpu->thread_id;
@@ -2328,34 +2248,13 @@ int start_fork(CPUState *cpu, target_ulong pc)
     CPUArchState * env = cpu->env_ptr;
 
 #if defined(FUZZ) || defined(MEM_MAPPING)
-#ifdef LMBENCH
-    //mipsel 
-    //if(pc == 0x400b64 && fork_times == 0) //fstat
-    //if(pc == (0x4009e4) && fork_times == 0) //select 0x400710 ||
-    //if(pc == (0x4009d0) && fork_times == 0) //select_debug //server
-    //if(pc == (0x4008c0) && fork_times == 0) //select_debug2 //server
-    //if(pc == (0x40088c) && fork_times == 0) //select_debug3 //server 0x4008e4
-    //if((pc == 0x401f90 ||  pc == 0x401f94 || pc == 0x400fdc) && fork_times == 0) //test
-    if(pc == 0x402950 && fork_times == 0) //test
-    //if(pc == 0x400850 && fork_times == 0) //pipe initialization
-    //if(pc == 0x400a30 && fork_times == 0) //read initialization
-    //if(pc == 0x40099c && fork_times == 0) //write initialization
-    //if(pc == start_fork_pc && fork_times == 0) //null openclose stat
-#else
     if(pc == start_fork_pc && fork_times == 0) //?////?????????
-#endif //LMBENCH
     {
 
         target_ulong pgd = DECAF_getPGD(cpu);       
 #ifdef DECAF
-#ifdef LMBENCH
-        if(pgd == target_pgd)
-        //if(pgd != 0 && httpd_pgd !=0 )
-        {
-#else
         if(pgd == target_pgd)
         {
-#endif //lmbench
 #endif //DECAF
             fork_times = 1;
 
@@ -3192,61 +3091,6 @@ skip_to_pos:
 #endif
             }
 #endif //#if defined(FUZZ) || defined(MEM_MAPPING)
-
-
-#ifdef LMBENCH
-            //lat_select_debug3
-            if(pc == 0x40067c && lat_select_init == 0) //init
-            {
-                lat_select_init = 1;
-                printf("*****************:%d\n",lmbench_count);
-                afl_wants_cpu_to_stop = 1;
-                goto end;   
-            }
-            if(pc == 0x400814) //user_fork
-            {
-                printf("user_fork *****************:%d\n",lmbench_count);
-                afl_wants_cpu_to_stop = 1;
-                goto end;   
-            }
-            /*
-            //lat_select_debug2
-            if(pc == 0x4006d0 && lat_select_init == 0) //init
-            {
-                lat_select_init = 1;
-                printf("*****************:%d\n",lmbench_count);
-                afl_wants_cpu_to_stop = 1;
-                goto end;   
-            }
-            //lat_select_debug
-            if(pc == 0x4007a4 && lat_select_init == 0) //init
-            {
-                lat_select_init = 1;
-                printf("*****************:%d\n",lmbench_count);
-                afl_wants_cpu_to_stop = 1;
-                goto end;   
-            }
-            */
-            /*
-            //lat_select
-            if(pc == 0x400710 && lat_select_init == 0)
-            {
-                lat_select_init = 1;
-                printf("*****************:%d\n",lmbench_count);
-                afl_wants_cpu_to_stop = 1;
-                goto end;   
-            }
-            */
-            if(pc == start_fork_pc)
-            {
-                lmbench_count++;
-                printf("*****************:%d\n",lmbench_count);
-                afl_wants_cpu_to_stop = 1;
-                goto end;   
-                //write_state(env);
-            }
-            
-#endif
             /*
             if(afl_user_fork && pc == 0x80133a84)
             {
